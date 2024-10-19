@@ -1,0 +1,148 @@
+info (
+	title:   "room rover account models"
+	author:  "thopb"
+	email:   "thoahlgbg2002@gmail.com"
+	version: "1.0"
+)
+
+import "model.api"
+
+type (
+	LoginReq {
+		Phone    string `form:"phone"`    // user_name
+		Password string `form:"password"` //  password
+	}
+	LoginRes {
+		Result Result `json:"result"`
+		Token  string `json:"token"` // jwt token for api
+		User   User   `json:"user"`  // Account info
+	}
+)
+
+type (
+	RegisterReq {
+		Phone    string `form:"phone"`
+		Password string `form:"password"`
+		UserRole int64  `form:"user_role"`
+	}
+	RegisterRes {
+		Result Result `json:"result"`
+		Token  string `json:"token"` // jwt token for api
+		User   User   `json:"user"`  // Account info
+	}
+)
+
+type (
+	GetUserReq {
+		UserID int64 `form:"user_id,optional"`
+	}
+	GetUserRes {
+		Result Result `json:"result"`
+		User   User   `json:"user"`
+	}
+)
+
+type (
+	UpdateUserReq {
+		UserID      int64  `path:"id"`
+		Password    string `form:"password,optional"`
+		FullName    string `form:"fullName,optional"`
+		Birthday    int64  `form:"birthday,optional"`
+		Address     string `form:"address,optional"`
+		AvatarUrl   string `form:"avatarUrl,optional"`
+		Gender      int64  `form:"gender,optional"`
+		CccdNumber  string `form:"cccdNumber,optional"`
+		CccdDate    int64  `form:"cccdDate,optional"`
+		CccdAddress string `form:"cccdAddress,optional"`
+	}
+	UpdateUserRes {
+		Result Result `json:"result"`
+		User   User   `json:"user"` // Account info
+	}
+)
+
+type (
+	ChangePasswordReq {
+		OldPassword string `form:"old_password"`
+		NewPassword string `form:"new_password"`
+	}
+	ChangePasswordRes {
+		Result Result `json:"result"`
+	}
+)
+
+type (
+	UploadFileReq {
+		UploadType int    `form:"upload_type"`
+		FileName   string `form:"file_name"`
+	}
+	UploadFileRes {
+		Result    Result `json:"result"`
+		AvatarUrl string `json:"avatar_url"`
+	}
+)
+
+type (
+	FilterUserReq {
+		SearchPhone string `form:"searchPhone,optional"`
+		Limit       int64  `form:"limit,optional"`
+		Offset      int64  `form:"offset,optional"`
+	}
+	FilterUserRes {
+		Result Result `json:"result"`
+		Users  []User `json:"users"`
+	}
+)
+
+@server (
+	prefix: /users
+)
+service account-api {
+	@doc (
+		summary: "User Login"
+	)
+	@handler Login
+	post /login (LoginReq) returns (LoginRes)
+	
+	@doc (
+		summary: "Register New User"
+	)
+	@handler Register
+	post /register (RegisterReq) returns (RegisterRes)
+	
+	@doc (
+		summary: "Filter User"
+	)
+	@handler FilterUser
+	get /filter (FilterUserReq) returns (FilterUserRes)
+}
+
+@server (
+	jwt:    Auth
+	prefix: /users
+)
+service account-api {
+	@doc (
+		summary: "Get User Info"
+	)
+	@handler GetUser
+	get /info (GetUserReq) returns (GetUserRes)
+	
+	@doc (
+		summary: "Update User Info"
+	)
+	@handler UpdateUser
+	put /:id (UpdateUserReq) returns (UpdateUserRes)
+	
+	@doc (
+		summary: "Change User Password"
+	)
+	@handler ChangePassword
+	put /change-password (ChangePasswordReq) returns (ChangePasswordRes)
+	
+	@doc (
+		summary: "Upload File"
+	)
+	@handler UploadFile
+	post /avatar (UploadFileReq) returns (UploadFileRes)
+}
